@@ -17,7 +17,7 @@ export interface DivisionItem {
   sort: number;
   describe: string;
   createdBy: number;
-  children: DivisionItem[] | null;
+  children?: DivisionItem[] | null;
 }
 // 部门列表结果类型
 export type DivisionsResult = BaseResult<{
@@ -30,7 +30,7 @@ export type DivisionResult = BaseResult<DivisionItem>;
 // 部门添加/编辑参数接口
 export interface DivisionFormData {
   id?: number;
-  parentId: number;
+  parentId?: number;
   name: string;
   status: number;
   leader?: string;

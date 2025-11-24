@@ -181,7 +181,7 @@
                         </a-radio-group>
                     </a-form-item>
                     <a-form-item field="parentId" label="上级菜单" validate-trigger="blur" >
-                        <a-tree-select v-model="addFrom.parentId" :data="menuTree" :field-names="{
+                        <a-tree-select v-model="addFrom.parentId" :data="menuTreeData" :field-names="{
                             key: 'id',
                             title: 'i18n',
                             children: 'children'
@@ -476,7 +476,6 @@ const formRef = ref();
 // 新增菜单
 const onAdd = () => {
     title.value = "新增菜单";
-
     addFrom.value.id = 0;
     open.value = true;
 };
@@ -534,7 +533,6 @@ const onUpdate = (row: any) => {
     //console.log(JSON.stringify(data))
     addFrom.value = data;
     title.value = "修改菜单";
-
     open.value = true;
 };
 
@@ -593,7 +591,43 @@ const onIframe = (is: boolean) => {
 
 const loading = ref(false);
 const tableRef = ref();
-const menuTree = ref<any>([]);
+
+/**
+ * 过滤菜单树，排除指定ID及其子节点
+ * @param nodes 菜单树节点
+ * @param excludeId 要排除的菜单ID
+ * @returns 过滤后的菜单树
+ */
+const filterMenuTreeExclude = (nodes: MenuItem[], excludeId?: number | string): MenuItem[] => {
+    if (!excludeId) {
+        return nodes;
+    }
+    return nodes
+        .filter((node: any) => node.id != excludeId)
+        .map((node: any) => {
+            const newNode = { ...node };
+            if (newNode.children && newNode.children.length > 0) {
+                const filteredChildren = filterMenuTreeExclude(newNode.children, excludeId);
+                if (filteredChildren.length > 0) {
+                    newNode.children = filteredChildren;
+                } else {
+                    delete newNode.children;
+                }
+            }
+            return newNode;
+        });
+};
+
+/**
+ * 用于树形选择的菜单数据计算属性
+ * 自动根据当前编辑菜单ID排除该菜单及其子节点
+ */
+const menuTreeData = computed(() => {
+    const clonedData = JSON.parse(JSON.stringify(allMenuList.value)) as MenuItem[];
+    const filteredData = filterMenuTreeExclude(clonedData, addFrom.value.id);
+    return filterTree(filteredData);
+});
+
 const getMenuList = async () => {
     try {
         loading.value = true;
@@ -602,10 +636,9 @@ const getMenuList = async () => {
         translation(data);
         // 存储所有数据
         allMenuList.value = data;
-        // 初始化显示所有数据
+        // 初始化昺示所有数据
         displayMenuList.value = [...allMenuList.value];
-        // 过滤type:3的节点，该节点是按钮权限，不显示在菜单中-用于下拉选择
-        menuTree.value = filterTree(data);
+        // menuTreeData 计算属性会自动响应更新
     } finally {
         loading.value = false;
     }

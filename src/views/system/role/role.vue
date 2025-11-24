@@ -313,6 +313,9 @@ const onUpdate = (row: any) => {
     formType.value = 1;
     title.value = "修改角色";
     const clonedRow = deepClone(row);
+    if (clonedRow.parentId == 0) {
+        clonedRow.parentId = undefined;
+    }
     addFrom.value = clonedRow;
     open.value = true;
 };
@@ -348,7 +351,9 @@ const flattenRoleList = computed(() => {
         });
         return result;
     };
-    return flatten(displayRoleList.value);
+    // 深度拷贝避免污染原始数据
+    const clonedData = JSON.parse(JSON.stringify(displayRoleList.value)) as RoleItem[];
+    return flatten(clonedData);
 });
 
 // 获取权限树
