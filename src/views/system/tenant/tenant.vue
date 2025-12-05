@@ -116,10 +116,22 @@
                     <a-input v-model="modalFormModel.name" placeholder="请输入租户名称" />
                 </a-form-item>
                 <a-form-item field="code" label="租户编码">
-                    <a-input v-model="modalFormModel.code" placeholder="请输入租户编码" :disabled="isEdit" />
+                    <a-input v-model="modalFormModel.code" placeholder="请输入子域名" />
+                      <template #extra>
+                        <div>租户编码即子域名，全局唯一，将参与前端租户识别</div>
+                    </template>
                 </a-form-item>
-                <a-form-item field="domain" label="绑定域名">
-                    <a-input v-model="modalFormModel.domain" placeholder="请输入绑定域名" />
+                <a-form-item field="domain" label="自定义域名">
+                    <a-input v-model="modalFormModel.domain" placeholder="请输入域名" />
+                    <template #extra>
+                        <div>自定义完整域名，全局唯一，设置后将参与前端租户识别，例如：dev.example.com或example.com</div>
+                    </template>
+                </a-form-item>
+                <a-form-item field="platformDomain" label="平台域名">
+                    <a-input v-model="modalFormModel.platformDomain" placeholder="请输入平台域名" />
+                    <template #extra>
+                        <div>主域名（不含子域名），设置后将参与前端租户识别，例如：example.com</div>
+                    </template>
                 </a-form-item>
                 <a-form-item field="description" label="描述">
                     <a-textarea v-model="modalFormModel.description" placeholder="请输入描述" />
@@ -187,12 +199,13 @@ const modalFormModel = reactive({
     code: '',
     domain: '',
     description: '',
-    status: 1
+    status: 1,
+    platformDomain:'',
 })
 
 const rules = {
     name: [{ required: true, message: '请输入租户名称' }],
-    code: [{ required: true, message: '请输入租户编码' }]
+    code: [{ required: true, message: '请输入租户编码' }],
 }
 
 const pagination = reactive({
@@ -258,6 +271,7 @@ const handleAdd = () => {
     modalFormModel.domain = ''
     modalFormModel.description = ''
     modalFormModel.status = 1
+    modalFormModel.platformDomain = ''
     currentRecord.value = null
 }
 
@@ -276,6 +290,7 @@ const handleEdit = async (record: Tenant) => {
         modalFormModel.domain = data.domain || ''
         modalFormModel.description = data.description || ''
         modalFormModel.status = data.status
+        modalFormModel.platformDomain = data.platformDomain || ''
     } catch (error) {
         Message.error('获取租户信息失败')
     }

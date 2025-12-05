@@ -127,7 +127,6 @@ export const routeConfigStore = () => {
      */
     async function initSetRouter() {
         // 1、获取过滤角色权限后的树，后端做排序处理
-        // let { data } = await getRoutersAPI();
 
         // 后端数据转换成前端所需格式
         let res = await getRoutersAPI();

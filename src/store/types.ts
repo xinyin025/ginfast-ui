@@ -7,4 +7,6 @@ export type userType = {
   permissions: Array<string>;
   tenantID: number;
   tenantCode: string;
+  tenantName: string;
+  tenantDomain: string;
 };

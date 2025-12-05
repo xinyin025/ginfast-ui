@@ -1,6 +1,16 @@
 <template>
     <a-layout-footer class="footer">
         <div class="footer_title" @click="onFooter">{{ systemCopyright }} {{ systemRecordNo }}</div>
+        <a-popover position="tl">
+            <div v-if="tenantName" class="footer_tenant">{{ `[租户:${tenantName}]`  }}</div>
+            <template #content>
+                <p>租户ID: {{ tenantID }}</p>
+                <p>租户编码: {{ tenantCode }}</p>
+                <p>租户名称: {{ tenantName }}</p>
+                <p>租户域名: {{ tenantDomain }}</p>
+            </template>
+        </a-popover>
+        
     </a-layout-footer>
 </template>
 
@@ -8,7 +18,11 @@
 
 import { useSysConfigStore } from "@/store/modules/sys-config";
 import { storeToRefs } from "pinia";
+import { useUserStore } from "@/store/modules/user";
 
+// 获取用户模块
+const userStore = useUserStore();
+const { account } = storeToRefs(userStore);
 
 // 获取系统配置
 const sysConfigStore = useSysConfigStore();
@@ -23,8 +37,32 @@ const systemCopyright = computed(() => {
 const systemRecordNo = computed(() => {
     return systemConfig.value?.systemRecordNo || "";
 });
+
+
+
+// 所在租户名称
+const tenantName = computed(() => {
+    return account.value.tenantName || "";
+});
+// 所在租户ID
+const tenantID = computed(() => {
+    return account.value.tenantID || 0;
+});
+
+// 所在租户Code
+const tenantCode = computed(() => {
+    return account.value.tenantCode || "";
+});
+
+// 所在租户域名
+const tenantDomain = computed(() => {
+    return account.value.tenantDomain || "";
+});
+
+
+
 const onFooter = () => {
-    //window.open("https://github.com/WangFan-io/SnowAdmin", "_blank");
+    window.open("https://github.com/qxkjsoft/ginfast-back", "_blank");
 };
 </script>
 
@@ -42,5 +80,10 @@ const onFooter = () => {
     color: $color-text-4;
     text-align: center;
     cursor: pointer;
+}
+
+.footer_tenant {
+    margin-right: 20px;
+    color: $color-text-4;
 }
 </style>

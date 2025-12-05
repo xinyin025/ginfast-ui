@@ -135,6 +135,13 @@ export const deleteMenuAPI = (data: any) => {
 };
 
 
+// 批量删除菜单
+export const deleteMenusAPI = (menuIds: number[]) => {
+    return http.request<BaseResult>("delete", baseUrlApi("sysMenu/batchDelete"), { data: {menuIds}});
+};
+
+
+
 // 导出菜单
 export const exportMenuAPI = (params: any) => {
     return http.request("get", baseUrlApi("sysMenu/export"), {

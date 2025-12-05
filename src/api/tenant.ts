@@ -14,6 +14,7 @@ export interface Tenant {
   createdBy: number
   createdAt: string
   updatedAt: string
+  platformDomain: string
 }
 
 /** 租户列表响应 */

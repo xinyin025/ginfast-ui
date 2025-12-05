@@ -51,6 +51,11 @@
                             <template #icon><icon-import /></template>
                             <span>导入</span>
                         </a-button>
+
+                        <a-button type="primary" status="danger" @click="onBatchDelete" v-hasPerm="['system:menu:delete']">
+                            <template #icon><icon-delete /></template>
+                            <span>批量删除</span>
+                        </a-button>
                     </a-space>
                 </template>
             </s-layout-tools>
@@ -326,10 +331,11 @@
 
 <script setup lang="ts">
 import SApiPermission from "@/components/s-api-permission/index.vue";
-import { type MenuItem, getMenuListAPI, addMenuAPI, updateMenuAPI, deleteMenuAPI, exportMenuAPI, importMenuAPI } from "@/api/menu";
+import { type MenuItem, getMenuListAPI, addMenuAPI, updateMenuAPI, deleteMenuAPI, exportMenuAPI, importMenuAPI, deleteMenusAPI } from "@/api/menu";
 import useGlobalProperties from "@/hooks/useGlobalProperties";
 import { deepClone, getPascalCase } from "@/utils";
 import { useDevicesSize } from "@/hooks/useDevicesSize";
+import { Modal } from '@arco-design/web-vue';
 const { isMobile } = useDevicesSize();
 const layoutMode = computed(() => {
   let info = {
@@ -700,6 +706,35 @@ const onDelete = async (row: any) => {
         console.error(error);
         arcoMessage("error", "删除失败");
     }
+};
+
+// 批量删除
+const onBatchDelete = () => {
+    if (selectedKeys.value.length === 0) {
+        arcoMessage("warning", "请选择要删除的菜单");
+        return;
+    }
+
+    Modal.confirm({
+        title: "批量删除菜单",
+        content: "注意：该操作为硬删除且会删除子级数据及关联的API数据",
+        okText: "确认删除",
+        cancelText: "取消",
+        okButtonProps: {
+            status: "danger"
+        },
+        onOk: async () => {
+            try {
+                await deleteMenusAPI(selectedKeys.value);
+                selectedKeys.value = [];
+                getMenuList();
+                arcoMessage("success", "批量删除成功");
+            } catch (error) {
+                console.error(error);
+                arcoMessage("error", "批量删除失败");
+            }
+        }
+    });
 };
 
 // API权限分配相关状态

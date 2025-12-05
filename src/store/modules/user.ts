@@ -19,7 +19,8 @@ export const useUserStore = defineStore("user", () => {
         permissions: userInfo?.permissions ?? [],
         tenantID: userInfo?.tenantID ?? 0,
         tenantCode: userInfo?.tenantCode ?? "",
-
+        tenantName: userInfo?.tenantName ?? "",
+        tenantDomain: userInfo?.tenantDomain ?? "",
     });
 
     // action
@@ -90,6 +91,8 @@ export const useUserStore = defineStore("user", () => {
             account.value.permissions = data.permissions;
             account.value.tenantID = data.tenantID;
             account.value.tenantCode = data.tenantCode;
+            account.value.tenantName = data.tenantName;
+            account.value.tenantDomain = data.tenantDomain;
             setLocalStorage(UserInfoKey, data);
         }
         return data;
