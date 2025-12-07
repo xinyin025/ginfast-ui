@@ -9,7 +9,7 @@ import {
     getExample
 } from '../api/example';
 
-
+// 也可以使用hooks的方式定义以下的状态和方法
 export const useExamplePluginStore = defineStore('example-plugin', () => {
     // State
     const dataList = ref<ExampleData[]>([]);

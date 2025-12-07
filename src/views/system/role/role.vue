@@ -103,7 +103,7 @@
                         </a-switch>
                     </a-form-item>
                     <a-form-item field="sort" label="排序" validate-trigger="blur">
-                        <a-input-number v-model="addFrom.sort" :step="1" :precision="0" :min="1" :max="9999"
+                        <a-input-number v-model="addFrom.sort" :step="1" :precision="0" :min="0" :max="9999"
                             :style="{ width: '150px' }" placeholder="请输入" mode="button" class="input-demo" />
                     </a-form-item>
                     <a-form-item field="description" label="描述" validate-trigger="blur">
@@ -256,7 +256,7 @@ const rules = {
 const addFrom = ref<any>({
     name: "",
     status: 1,
-    sort: 1,
+    sort: 0,
     description: "",
     parentId: null
 });
@@ -303,7 +303,7 @@ const afterClose = () => {
     addFrom.value = {
         name: "",
         status: 1,
-        sort: 1,
+        sort: 0,
         description: "",
         parentId: null
     };
@@ -313,6 +313,9 @@ const onUpdate = (row: any) => {
     formType.value = 1;
     title.value = "修改角色";
     const clonedRow = deepClone(row);
+    if (clonedRow.parentId == 0) {
+        clonedRow.parentId = undefined;
+    }
     addFrom.value = clonedRow;
     open.value = true;
 };
@@ -348,7 +351,9 @@ const flattenRoleList = computed(() => {
         });
         return result;
     };
-    return flatten(displayRoleList.value);
+    // 深度拷贝避免污染原始数据
+    const clonedData = JSON.parse(JSON.stringify(displayRoleList.value)) as RoleItem[];
+    return flatten(clonedData);
 });
 
 // 获取权限树

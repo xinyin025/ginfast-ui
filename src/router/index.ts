@@ -4,7 +4,6 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import { staticRoutes, notFoundAndNoPower } from "@/router/route.ts";
 import { currentlyRoute } from "@/router/route-output";
 import { storeToRefs } from "pinia";
-//import { useUserInfoStore } from "@/store/modules/user-info";
 import { useRouteConfigStore } from "@/store/modules/route-config";
 import { useRoutingMethod } from "@/hooks/useRoutingMethod";
 import { hasRefreshToken } from "@/utils/auth";

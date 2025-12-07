@@ -12,6 +12,8 @@ export interface AffixItem {
     createdBy: number;
     createdAt: string;
     updatedAt: string;
+    url: string;
+    suffix: string;
 }
 
 // 文件列表响应

@@ -51,6 +51,11 @@
                             <template #icon><icon-import /></template>
                             <span>导入</span>
                         </a-button>
+
+                        <a-button type="primary" status="danger" @click="onBatchDelete" v-hasPerm="['system:menu:delete']">
+                            <template #icon><icon-delete /></template>
+                            <span>批量删除</span>
+                        </a-button>
                     </a-space>
                 </template>
             </s-layout-tools>
@@ -181,7 +186,7 @@
                         </a-radio-group>
                     </a-form-item>
                     <a-form-item field="parentId" label="上级菜单" validate-trigger="blur" >
-                        <a-tree-select v-model="addFrom.parentId" :data="menuTree" :field-names="{
+                        <a-tree-select v-model="addFrom.parentId" :data="menuTreeData" :field-names="{
                             key: 'id',
                             title: 'i18n',
                             children: 'children'
@@ -326,10 +331,11 @@
 
 <script setup lang="ts">
 import SApiPermission from "@/components/s-api-permission/index.vue";
-import { type MenuItem, getMenuListAPI, addMenuAPI, updateMenuAPI, deleteMenuAPI, exportMenuAPI, importMenuAPI } from "@/api/menu";
+import { type MenuItem, getMenuListAPI, addMenuAPI, updateMenuAPI, deleteMenuAPI, exportMenuAPI, importMenuAPI, deleteMenusAPI } from "@/api/menu";
 import useGlobalProperties from "@/hooks/useGlobalProperties";
 import { deepClone, getPascalCase } from "@/utils";
 import { useDevicesSize } from "@/hooks/useDevicesSize";
+import { Modal } from '@arco-design/web-vue';
 const { isMobile } = useDevicesSize();
 const layoutMode = computed(() => {
   let info = {
@@ -467,7 +473,7 @@ const addFrom = ref<any>({
     isLink: false,
     link: "",
     iframe: false,
-    sort: 1
+    sort: 0
 });
 
 const title = ref("");
@@ -476,7 +482,6 @@ const formRef = ref();
 // 新增菜单
 const onAdd = () => {
     title.value = "新增菜单";
-
     addFrom.value.id = 0;
     open.value = true;
 };
@@ -521,7 +526,7 @@ const afterClose = () => {
         isLink: false,
         link: "",
         iframe: false,
-        sort: 1
+        sort: 0
     };
 };
 // 修改
@@ -534,7 +539,6 @@ const onUpdate = (row: any) => {
     //console.log(JSON.stringify(data))
     addFrom.value = data;
     title.value = "修改菜单";
-
     open.value = true;
 };
 
@@ -593,7 +597,43 @@ const onIframe = (is: boolean) => {
 
 const loading = ref(false);
 const tableRef = ref();
-const menuTree = ref<any>([]);
+
+/**
+ * 过滤菜单树，排除指定ID及其子节点
+ * @param nodes 菜单树节点
+ * @param excludeId 要排除的菜单ID
+ * @returns 过滤后的菜单树
+ */
+const filterMenuTreeExclude = (nodes: MenuItem[], excludeId?: number | string): MenuItem[] => {
+    if (!excludeId) {
+        return nodes;
+    }
+    return nodes
+        .filter((node: any) => node.id != excludeId)
+        .map((node: any) => {
+            const newNode = { ...node };
+            if (newNode.children && newNode.children.length > 0) {
+                const filteredChildren = filterMenuTreeExclude(newNode.children, excludeId);
+                if (filteredChildren.length > 0) {
+                    newNode.children = filteredChildren;
+                } else {
+                    delete newNode.children;
+                }
+            }
+            return newNode;
+        });
+};
+
+/**
+ * 用于树形选择的菜单数据计算属性
+ * 自动根据当前编辑菜单ID排除该菜单及其子节点
+ */
+const menuTreeData = computed(() => {
+    const clonedData = JSON.parse(JSON.stringify(allMenuList.value)) as MenuItem[];
+    const filteredData = filterMenuTreeExclude(clonedData, addFrom.value.id);
+    return filterTree(filteredData);
+});
+
 const getMenuList = async () => {
     try {
         loading.value = true;
@@ -602,10 +642,9 @@ const getMenuList = async () => {
         translation(data);
         // 存储所有数据
         allMenuList.value = data;
-        // 初始化显示所有数据
+        // 初始化昺示所有数据
         displayMenuList.value = [...allMenuList.value];
-        // 过滤type:3的节点，该节点是按钮权限，不显示在菜单中-用于下拉选择
-        menuTree.value = filterTree(data);
+        // menuTreeData 计算属性会自动响应更新
     } finally {
         loading.value = false;
     }
@@ -667,6 +706,35 @@ const onDelete = async (row: any) => {
         console.error(error);
         arcoMessage("error", "删除失败");
     }
+};
+
+// 批量删除
+const onBatchDelete = () => {
+    if (selectedKeys.value.length === 0) {
+        arcoMessage("warning", "请选择要删除的菜单");
+        return;
+    }
+
+    Modal.confirm({
+        title: "批量删除菜单",
+        content: "注意：该操作为硬删除且会删除子级数据及关联的API数据",
+        okText: "确认删除",
+        cancelText: "取消",
+        okButtonProps: {
+            status: "danger"
+        },
+        onOk: async () => {
+            try {
+                await deleteMenusAPI(selectedKeys.value);
+                selectedKeys.value = [];
+                getMenuList();
+                arcoMessage("success", "批量删除成功");
+            } catch (error) {
+                console.error(error);
+                arcoMessage("error", "批量删除失败");
+            }
+        }
+    });
 };
 
 // API权限分配相关状态

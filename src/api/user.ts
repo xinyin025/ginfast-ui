@@ -33,9 +33,6 @@ export type ProfileItem = {
     roleIDs: Array<number>;
     /** 按钮级别权限 */
     permissions: Array<string>;
-    tenantID: number;
-    tenantCode: string;
-    /** 性别 */
     sex: string;
     status: number;
     email: string;
@@ -44,6 +41,10 @@ export type ProfileItem = {
     description: string;
     roles: Array<RoleItem>;
     department: DivisionItem;
+    tenantID: number;
+    tenantCode: string;
+    tenantName: string;
+    tenantDomain: string;
 }
 
 export type ProfileResult = BaseResult<ProfileItem>;

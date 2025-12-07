@@ -141,5 +141,6 @@ export default {
         ["plugin-example"]: "plugin example",
         ["tenant"]: "tenant management",
         ["codegen"]: "code generation",
+        ["plugins-manager"]: "plugins manager",
     }
 };

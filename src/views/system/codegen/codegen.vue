@@ -100,7 +100,7 @@
         <CodegenConfigDrawer v-model:visible="editVisible" :record-id="currentEditId" @success="handleEditSuccess" />
 
         <!-- 代码预览模态框 -->
-        <a-modal v-model:visible="previewVisible" :title="previewTitle" width="100%" :body-style="{ padding: '0px', height: '600px', display: 'flex', flexDirection: 'column' }" :ok-text="null" :cancel-text="null">
+        <a-modal v-model:visible="previewVisible" :title="previewTitle" width="100%" :body-style="{ padding: '0px', height: '600px', display: 'flex', flexDirection: 'column' }" >
             <div class="preview-modal-container">
                 <!-- 加载状态 -->
                 <div v-if="previewLoading" class="preview-loading">
@@ -138,6 +138,10 @@
                         <a-button v-if="previewData.frontendApi" :type="activeTab === 'frontendApi' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'frontendApi'">
                             Frontend API
                         </a-button>
+                        <a-button v-if="previewData.frontendHooks" :type="activeTab === 'frontendHooks' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'frontendHooks'">
+                            Frontend Hooks
+                        </a-button>
+
                         <a-button v-if="previewData.frontendStore" :type="activeTab === 'frontendStore' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'frontendStore'">
                             Frontend Store
                         </a-button>
@@ -239,6 +243,19 @@
                             </div>
                         </div>
                         
+                        <div v-if="activeTab === 'frontendHooks' && previewData.frontendHooks" class="code-wrapper">
+                            <div class="code-header">
+                                <a-button type="primary" size="small" @click="copyCode('frontendHooks')">
+                                    <template #icon><icon-copy /></template>
+                                    <span>复制代码</span>
+                                </a-button>
+                                <div class="code-info">前端 Hooks 文件</div>
+                            </div>
+                            <div class="code-container">
+                                <s-code-view :code-json="previewData.frontendHooks" type="javascript" />
+                            </div>
+                        </div>
+                        
                         <div v-if="activeTab === 'frontendStore' && previewData.frontendStore" class="code-wrapper">
                             <div class="code-header">
                                 <a-button type="primary" size="small" @click="copyCode('frontendStore')">
@@ -267,6 +284,13 @@
                     </div>
                 </div>
             </div>
+            
+            <template #footer>
+                <a-space>
+                    <a-button @click="closePreviewModal">退出</a-button>
+                    <a-button type="primary" v-hasPerm="['system:codegen:insertmenuandapi']" @click="generateMenuAndApi">生成菜单</a-button>
+                </a-space>
+            </template>
         </a-modal>
     </div>
 </template>
@@ -281,7 +305,7 @@ import {
     type SysGenListParams,
 } from "@/api/sysgen";
 
-import { generateCode, previewCode } from "@/api/syscodegen";
+import { generateCode, previewCode,insertmenuandapi } from "@/api/syscodegen";
 import { getTables, type TableInfo } from "@/api/syscodegen";
 import { formatTime } from "@/globals";
 import CodegenConfigDrawer from './components/codegen-config-drawer.vue';
@@ -506,6 +530,7 @@ const previewData = ref<{
     init?: string,
     frontendApi?: string,
     frontendStore?: string,
+    frontendHooks?: string,
     frontendView?: string
 }>({
     model: "",
@@ -516,6 +541,7 @@ const previewData = ref<{
     init: "",
     frontendApi: "",
     frontendStore: "",
+    frontendHooks: "",
     frontendView: ""
 });
 
@@ -527,6 +553,7 @@ const hasPreviewData = computed(() => {
 const onPreview = async (record: SysGenItem) => {
     previewVisible.value = true;
     previewTitle.value = `${record.name} - 代码预览`;
+    previewRecord.value = record; // 保存当前记录
     previewLoading.value = true;
     activeTab.value = "model";
     // 重置预览数据
@@ -539,6 +566,7 @@ const onPreview = async (record: SysGenItem) => {
         init: "",
         frontendApi: "",
         frontendStore: "",
+        frontendHooks: "",
         frontendView: ""
     };
     try {
@@ -555,6 +583,7 @@ const onPreview = async (record: SysGenItem) => {
                 init: formatCode(preview.init),
                 frontendApi: formatCode(preview.frontendApi),
                 frontendStore: formatCode(preview.frontendStore),
+                frontendHooks: formatCode(preview.frontendHooks),
                 frontendView: formatCode(preview.frontendView)
             };
         }
@@ -581,10 +610,36 @@ const copyCode = (key: string) => {
     const code = previewData.value[key as keyof typeof previewData.value];
     if (code) {
         navigator.clipboard.writeText(code).then(() => {
-            arcoMessage("success", "代码已复制到剪贴板");
+            arcoMessage("success", "代码已复制到剂贴板");
         }).catch(() => {
             arcoMessage("error", "复制失败，请手动复制");
         });
+    }
+};
+
+// 保存当前预览的记录
+const previewRecord = ref<SysGenItem | null>(null);
+
+// 退出预览模态框
+const closePreviewModal = () => {
+    previewVisible.value = false;
+    previewRecord.value = null; // 重置记录
+};
+
+// 生成菜单
+const generateMenuAndApi = async () => {
+    if (!previewRecord.value) {
+        arcoMessage("warning", "找不到所选表配置");
+        return;
+    }
+    try {
+        await insertmenuandapi(previewRecord.value.id);
+        arcoMessage("success", "菜单生成成功");
+        previewVisible.value = false;
+        getSysGenList(); // 刷新列表
+    } catch (error) {
+        console.error("菜单生成失败:", error);
+        arcoMessage("error", "菜单生成失败");
     }
 };
 

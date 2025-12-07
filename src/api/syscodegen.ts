@@ -50,6 +50,7 @@ export type PreviewCodeResponse = BaseResult<{
       "init": string,
       "frontendApi": string,
       "frontendStore": string,
+      "frontendHooks": string,
       "frontendView": string
   };
 }>
@@ -104,5 +105,19 @@ export const generateCode = (genId: number) => {
 export const previewCode = (genId: number) => {
   return http.request<PreviewCodeResponse>("get", baseUrlApi("codegen/preview"), {
     params: { genId }
+  });
+};
+
+
+/**
+ * 生成菜单
+ * @param genId 生成任务ID
+ * @returns 生成的代码
+ */
+export const insertmenuandapi = (genId: number) => {
+  return http.request<BaseResult<{
+    code: string;
+  }>>("post", baseUrlApi("codegen/insertmenuandapi"), {
+    data: { genId }
   });
 };

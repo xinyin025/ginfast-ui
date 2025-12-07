@@ -125,6 +125,9 @@
                                             <a-option value="radio">单选框</a-option>
                                             <a-option value="checkbox">复选框</a-option>
                                             <a-option value="datetime">日期时间</a-option>
+                                            <a-option value="image">单图上传</a-option>
+                                            <a-option value="images">多图上传</a-option>
+                                            <a-option value="richtext">富文本</a-option>
                                         </a-select>
                                     </template>
                                 </a-table-column>

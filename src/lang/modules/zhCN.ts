@@ -141,5 +141,6 @@ export default {
         ["plugin-example"]: "插件示例",
         ["tenant"]: "租户管理",
         ["codegen"]: "代码生成",
+        ["plugins-manager"]: "插件管理",
     },
 };

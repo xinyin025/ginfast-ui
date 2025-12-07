@@ -83,7 +83,7 @@
                 <a-form ref="formRef" :layout="layoutMode.layout" auto-label-width :rules="rules" :model="addFrom">
                     <a-form-item field="parentId" label="上级部门" validate-trigger="blur">
                         <a-tree-select v-model="addFrom.parentId"
-                            :data="[{ id: 0, name: '无上级部门', children: null }, ...allDivisionList]" 
+                            :data="filterDivisionList" 
                             :field-names="{
                                 key: 'id',
                                 title: 'name',
@@ -181,7 +181,7 @@ const rules = {
     ]
 };
 const addFrom = ref<DivisionFormData>({
-    parentId: 0,
+    parentId: undefined,
     name: "",
     sort: 0,
     leader: "",
@@ -225,9 +225,9 @@ const handleOk = async () => {
 const afterClose = () => {
     formRef.value.resetFields();
     addFrom.value = {
-        parentId: 0,
+        parentId: undefined,
         name: "",
-        sort: 1,
+        sort: 0,
         leader: "",
         phone: "",
         email: "",
@@ -240,17 +240,50 @@ const onUpdate = (row: DivisionItem) => {
     formType.value = 1;
     addFrom.value = {
         id: row.id,
-        parentId: row.parentId,
+        parentId: row.parentId == 0 ? undefined : row.parentId,
         name: row.name,
         status: row.status,
         leader: row.leader || "",
         phone: row.phone || "",
         email: row.email || "",
-        sort: row.sort || 1,
+        sort: row.sort || 0,
         describe: row.describe || ""
     };
     open.value = true;
 };
+
+// 过滤部门树，排除指定ID及其子节点
+const filterDivisionTreeExclude = (nodes: DivisionItem[], excludeId?: number): DivisionItem[] => {
+    if (!excludeId) {
+        return nodes;
+    }
+    return nodes
+        .filter((node) => node.id !== excludeId)
+        .map((node) => {
+            const newNode = { ...node };
+            if (newNode.children && newNode.children.length > 0) {
+                const filteredChildren = filterDivisionTreeExclude(newNode.children, excludeId);
+                if (filteredChildren.length > 0) {
+                    newNode.children = filteredChildren;
+                } else {
+                    newNode.children = undefined;
+                }
+            }
+            return newNode;
+        });
+};
+
+// 计算过滤后的部门列表（编辑时排除自己和自己的子级）
+const filterDivisionList = computed(() => {
+    // 如果是新增模式，返回所有部门
+    if (formType.value !== 1) {
+        return allDivisionList.value;
+    }
+    // 编辑时排除自己及其所有子级（深度拷贝避免污染原始数据）
+    const clonedData = JSON.parse(JSON.stringify(allDivisionList.value)) as DivisionItem[];
+    return filterDivisionTreeExclude(clonedData, addFrom.value.id);
+});
+
 const addDivision = (id: number) => {
     title.value = "新增部门";
     formType.value = 2;
