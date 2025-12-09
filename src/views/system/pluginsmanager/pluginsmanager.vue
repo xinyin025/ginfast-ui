@@ -16,7 +16,7 @@
           </a-space>
         </template>
         <template #right>
-          <a-button type="primary" @click="showImportModal">
+          <a-button type="primary" @click="showImportModal" v-hasPerm="['system:pluginsmanager:import']">
             <template #icon><icon-upload /></template>
             <span>导入插件</span>
           </a-button>
@@ -92,12 +92,12 @@
       </a-descriptions>
       <div style="margin-top: 24px; text-align: right;">
         <a-space>
-          <a-button type="primary" @click="exportPlugin(currentPlugin)">
+          <a-button type="primary" @click="exportPlugin(currentPlugin)" v-hasPerm="['system:pluginsmanager:export']">
             <template #icon><icon-download /></template>
             <span>导出插件</span>
           </a-button>
           <a-popconfirm title="确定要卸载此插件吗？" content="卸载后将删除插件的所有文件和数据库表。" type="warning" @ok="handleDeletePlugin">
-            <a-button type="primary" status="danger">
+            <a-button type="primary" status="danger" v-hasPerm="['system:pluginsmanager:uninstall']">
               <template #icon><icon-delete /></template>
               <span>卸载插件</span>
             </a-button>

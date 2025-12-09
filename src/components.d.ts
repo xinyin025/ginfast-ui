@@ -15,7 +15,6 @@ declare module 'vue' {
     AButton: typeof import('@arco-design/web-vue')['Button']
     ACard: typeof import('@arco-design/web-vue')['Card']
     ACheckbox: typeof import('@arco-design/web-vue')['Checkbox']
-    ACheckboxGroup: typeof import('@arco-design/web-vue')['CheckboxGroup']
     ACol: typeof import('@arco-design/web-vue')['Col']
     AConfigProvider: typeof import('@arco-design/web-vue')['ConfigProvider']
     ADatePicker: typeof import('@arco-design/web-vue')['DatePicker']
@@ -57,7 +56,6 @@ declare module 'vue' {
     ARow: typeof import('@arco-design/web-vue')['Row']
     AScrollbar: typeof import('@arco-design/web-vue')['Scrollbar']
     ASelect: typeof import('@arco-design/web-vue')['Select']
-    ASelectOption: typeof import('@arco-design/web-vue')['SelectOption']
     ASlider: typeof import('@arco-design/web-vue')['Slider']
     ASpace: typeof import('@arco-design/web-vue')['Space']
     ASpin: typeof import('@arco-design/web-vue')['Spin']
@@ -80,7 +78,6 @@ declare module 'vue' {
     ImageUpload: typeof import('./components/upload/image-upload.vue')['default']
     'Index copy': typeof import('./components/s-layout-search/index copy.vue')['default']
     MultiImageUpload: typeof import('./components/upload/multi-image-upload.vue')['default']
-    MultiImageUploadDemo: typeof import('./components/upload/multi-image-upload-demo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SAddUserModal: typeof import('./components/s-add-user-modal/index.vue')['default']
@@ -105,7 +102,6 @@ declare module 'vue' {
     SSvgIcon: typeof import('./components/s-svg-icon/index.vue')['default']
     STenantUser: typeof import('./components/s-tenant-user/index.vue')['default']
     SVerifyCode: typeof import('./components/s-verify-code/index.vue')['default']
-    SWangEditor: typeof import('./components/s-wang-editor/index.vue')['default']
     WangEditor: typeof import('./components/wang-editor/index.vue')['default']
   }
 }
