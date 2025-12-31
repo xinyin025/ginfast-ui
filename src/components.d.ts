@@ -8,7 +8,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AAlert: typeof import('@arco-design/web-vue')['Alert']
-    AAvatar: typeof import('@arco-design/web-vue')['Avatar']
     ABadge: typeof import('@arco-design/web-vue')['Badge']
     ABreadcrumb: typeof import('@arco-design/web-vue')['Breadcrumb']
     ABreadcrumbItem: typeof import('@arco-design/web-vue')['BreadcrumbItem']
@@ -84,6 +83,7 @@ declare module 'vue' {
     SApiPermission: typeof import('./components/s-api-permission/index.vue')['default']
     SBarcodeDraw: typeof import('./components/s-barcode-draw/index.vue')['default']
     SCodeView: typeof import('./components/s-code-view/index.vue')['default']
+    SExcelReader: typeof import('./components/s-excel-reader/index.vue')['default']
     SExternalLinkPage: typeof import('./components/s-external-link-page/index.vue')['default']
     SFoldPage: typeof import('./components/s-fold-page/index.vue')['default']
     SFullPage: typeof import('./components/s-full-page/index.vue')['default']
