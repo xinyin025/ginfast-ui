@@ -100,198 +100,7 @@
         <CodegenConfigDrawer v-model:visible="editVisible" :record-id="currentEditId" @success="handleEditSuccess" />
 
         <!-- 代码预览模态框 -->
-        <a-modal v-model:visible="previewVisible" :title="previewTitle" width="100%" :body-style="{ padding: '0px', height: '600px', display: 'flex', flexDirection: 'column' }" >
-            <div class="preview-modal-container">
-                <!-- 加载状态 -->
-                <div v-if="previewLoading" class="preview-loading">
-                    <a-spin tip="正在加载代码预览..." />
-                </div>
-                
-                <!-- 空状态 -->
-                <div v-else-if="!hasPreviewData" class="preview-empty">
-                    <icon-file class="empty-icon" />
-                    <div class="empty-text">暂无代码预览数据</div>
-                </div>
-                
-                <!-- 代码预览内容 -->
-                <div v-else class="preview-content">
-                    <!-- 标签按钮 -->
-                    <div class="preview-tabs-header">
-                        <a-button v-if="previewData.model" :type="activeTab === 'model' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'model'">
-                            Model
-                        </a-button>
-                        <a-button v-if="previewData.modelparam" :type="activeTab === 'modelparam' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'modelparam'">
-                            ModelParam
-                        </a-button>
-                        <a-button v-if="previewData.controller" :type="activeTab === 'controller' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'controller'">
-                            Controller
-                        </a-button>
-                        <a-button v-if="previewData.service" :type="activeTab === 'service' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'service'">
-                            Service
-                        </a-button>
-                        <a-button v-if="previewData.routes" :type="activeTab === 'routes' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'routes'">
-                            Routes
-                        </a-button>
-                        <a-button v-if="previewData.init" :type="activeTab === 'init' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'init'">
-                            Init
-                        </a-button>
-                        <a-button v-if="previewData.frontendApi" :type="activeTab === 'frontendApi' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'frontendApi'">
-                            Frontend API
-                        </a-button>
-                        <a-button v-if="previewData.frontendHooks" :type="activeTab === 'frontendHooks' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'frontendHooks'">
-                            Frontend Hooks
-                        </a-button>
-
-                        <a-button v-if="previewData.frontendStore" :type="activeTab === 'frontendStore' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'frontendStore'">
-                            Frontend Store
-                        </a-button>
-                        <a-button v-if="previewData.frontendView" :type="activeTab === 'frontendView' ? 'primary' : 'secondary'" size="small" @click="activeTab = 'frontendView'">
-                            Frontend View
-                        </a-button>
-                    </div>
-                    
-                    <!-- 代码展示区 -->
-                    <div class="preview-content-body">
-                        <div v-if="activeTab === 'model' && previewData.model" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('model')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">Go Model 文件</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.model" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'modelparam' && previewData.modelparam" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('modelparam')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">Go 参数结构体</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.modelparam" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'controller' && previewData.controller" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('controller')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">Go 控制器</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.controller" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'service' && previewData.service" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('service')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">Go 服务层</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.service" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'routes' && previewData.routes" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('routes')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">路由配置</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.routes" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'init' && previewData.init" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('init')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">初始化文件</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.init" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'frontendApi' && previewData.frontendApi" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('frontendApi')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">前端 API 文件</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.frontendApi" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'frontendHooks' && previewData.frontendHooks" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('frontendHooks')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">前端 Hooks 文件</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.frontendHooks" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'frontendStore' && previewData.frontendStore" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('frontendStore')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">前端 Store 文件</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.frontendStore" type="javascript" />
-                            </div>
-                        </div>
-                        
-                        <div v-if="activeTab === 'frontendView' && previewData.frontendView" class="code-wrapper">
-                            <div class="code-header">
-                                <a-button type="primary" size="small" @click="copyCode('frontendView')">
-                                    <template #icon><icon-copy /></template>
-                                    <span>复制代码</span>
-                                </a-button>
-                                <div class="code-info">前端页面文件</div>
-                            </div>
-                            <div class="code-container">
-                                <s-code-view :code-json="previewData.frontendView" type="javascript" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <template #footer>
-                <a-space>
-                    <a-button @click="closePreviewModal">退出</a-button>
-                    <a-button type="primary" v-hasPerm="['system:codegen:insertmenuandapi']" @click="generateMenuAndApi">生成菜单</a-button>
-                </a-space>
-            </template>
-        </a-modal>
+        <CodegenPreviewModal v-model:visible="previewVisible" :record-id="currentPreviewId" :record="currentPreviewRecord" @success="handlePreviewSuccess" />
     </div>
 </template>
 
@@ -305,11 +114,10 @@ import {
     type SysGenListParams,
 } from "@/api/sysgen";
 
-import { generateCode, previewCode,insertmenuandapi } from "@/api/syscodegen";
-import { getTables, type TableInfo } from "@/api/syscodegen";
+import { generateCode, getTables, type TableInfo } from "@/api/syscodegen";
 import { formatTime } from "@/globals";
 import CodegenConfigDrawer from './components/codegen-config-drawer.vue';
-import SCodeView from "@/components/s-code-view/index.vue";
+import CodegenPreviewModal from './components/codegen-preview-modal.vue';
 import { useDevicesSize } from "@/hooks/useDevicesSize";
 const { isMobile } = useDevicesSize();
 const layoutMode = computed(() => {
@@ -518,129 +326,19 @@ const onRefreshFields = async (record: SysGenItem) => {
 
 // 预览
 const previewVisible = ref(false);
-const previewTitle = ref("");
-const previewLoading = ref(false);
-const activeTab = ref("model");
-const previewData = ref<{
-    model?: string,
-    modelparam?: string,
-    controller?: string,
-    service?: string,
-    routes?: string,
-    init?: string,
-    frontendApi?: string,
-    frontendStore?: string,
-    frontendHooks?: string,
-    frontendView?: string
-}>({
-    model: "",
-    modelparam: "",
-    controller: "",
-    service: "",
-    routes: "",
-    init: "",
-    frontendApi: "",
-    frontendStore: "",
-    frontendHooks: "",
-    frontendView: ""
-});
+const currentPreviewId = ref(0);
+const currentPreviewRecord = ref<SysGenItem | null>(null);
 
-// 检查是否有预览数据
-const hasPreviewData = computed(() => {
-    return Object.values(previewData.value).some(value => value && value.trim() !== '');
-});
-
-const onPreview = async (record: SysGenItem) => {
+// 打开预览模态框
+const onPreview = (record: SysGenItem) => {
+    currentPreviewId.value = record.id;
+    currentPreviewRecord.value = record;
     previewVisible.value = true;
-    previewTitle.value = `${record.name} - 代码预览`;
-    previewRecord.value = record; // 保存当前记录
-    previewLoading.value = true;
-    activeTab.value = "model";
-    // 重置预览数据
-    previewData.value = {
-        model: "",
-        modelparam: "",
-        controller: "",
-        service: "",
-        routes: "",
-        init: "",
-        frontendApi: "",
-        frontendStore: "",
-        frontendHooks: "",
-        frontendView: ""
-    };
-    try {
-        const res = await previewCode(record.id);
-        if (res.data && res.data.preview) {
-            // 格式化代码
-            const preview = res.data.preview;
-            previewData.value = {
-                model: formatCode(preview.model),
-                modelparam: formatCode(preview.modelparam),
-                controller: formatCode(preview.controller),
-                service: formatCode(preview.service),
-                routes: formatCode(preview.routes),
-                init: formatCode(preview.init),
-                frontendApi: formatCode(preview.frontendApi),
-                frontendStore: formatCode(preview.frontendStore),
-                frontendHooks: formatCode(preview.frontendHooks),
-                frontendView: formatCode(preview.frontendView)
-            };
-        }
-    } catch (error) {
-        console.error("预览代码失败:", error);
-        arcoMessage("error", "预览代码失败");
-    } finally {
-        previewLoading.value = false;
-    }
 };
 
-// 处理代码字符串中的特殊字符
-const formatCode = (code: string | undefined) => {
-    if (!code) return '';
-    // 处理 \r\n\t 等特殊字符
-    return code
-        .replace(/\r\n/g, '\n')  // Windows换行符转Unix换行符
-        .replace(/\r/g, '\n')    // Mac换行符转Unix换行符
-        .replace(/\t/g, '    '); // 制表符转4个空格
-};
-
-// 复制代码
-const copyCode = (key: string) => {
-    const code = previewData.value[key as keyof typeof previewData.value];
-    if (code) {
-        navigator.clipboard.writeText(code).then(() => {
-            arcoMessage("success", "代码已复制到剂贴板");
-        }).catch(() => {
-            arcoMessage("error", "复制失败，请手动复制");
-        });
-    }
-};
-
-// 保存当前预览的记录
-const previewRecord = ref<SysGenItem | null>(null);
-
-// 退出预览模态框
-const closePreviewModal = () => {
-    previewVisible.value = false;
-    previewRecord.value = null; // 重置记录
-};
-
-// 生成菜单
-const generateMenuAndApi = async () => {
-    if (!previewRecord.value) {
-        arcoMessage("warning", "找不到所选表配置");
-        return;
-    }
-    try {
-        await insertmenuandapi(previewRecord.value.id);
-        arcoMessage("success", "菜单生成成功");
-        previewVisible.value = false;
-        getSysGenList(); // 刷新列表
-    } catch (error) {
-        console.error("菜单生成失败:", error);
-        arcoMessage("error", "菜单生成失败");
-    }
+// 处理预览成功
+const handlePreviewSuccess = () => {
+    getSysGenList(); // 刷新列表
 };
 
 
@@ -652,72 +350,4 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.preview-modal-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.preview-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.preview-tabs-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border-2);
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 10;
-}
-
-.preview-content-body {
-  flex: 1;
-}
-
-.preview-loading,
-.preview-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  gap: 16px;
-}
-
-.preview-empty {
-  .empty-icon {
-    font-size: 48px;
-    color: var(--color-text-3);
-  }
-  
-  .empty-text {
-    color: var(--color-text-3);
-    font-size: 14px;
-  }
-}
-
-.code-wrapper {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  
-  .code-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    gap: 12px;
-  }
-  
-  .code-container {
-    flex: 1;
-    border: 1px solid var(--color-border-2);
-    border-radius: 4px;
-  }
-}
 </style>

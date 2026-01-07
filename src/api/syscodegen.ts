@@ -40,8 +40,17 @@ export type ColumnsResponse = BaseResult<{
 
 
 
+/** 文件树节点 */
+export interface FileTreeNode {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  children?: FileTreeNode[];
+}
+
 export type PreviewCodeResponse = BaseResult<{
-  preview: {
+  tree: FileTreeNode[];
+  code: {
       "model": string,
       "modelparam": string,
       "controller": string,
