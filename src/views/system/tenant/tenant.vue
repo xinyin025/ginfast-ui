@@ -142,6 +142,11 @@
                         <a-radio :value="0">停用</a-radio>
                     </a-radio-group>
                 </a-form-item>
+                <a-form-item field="menuPermission" label="菜单权限">
+                    <a-scrollbar style="height:400px;overflow: auto;">
+                        <menu-permission-tree v-model="modalFormModel.menuPermission" />
+                    </a-scrollbar>
+                </a-form-item>
             </a-form>
         </a-modal>
 
@@ -152,7 +157,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { getTenantList, addTenant, updateTenant, deleteTenant, getTenantById, Tenant } from '@/api/tenant'
 import { formatTime } from "@/globals";
@@ -162,6 +167,7 @@ import STenantUser from "@/components/s-tenant-user/index.vue";
 // 引入图标组件
 import { IconUser } from '@arco-design/web-vue/es/icon';
 import { useDevicesSize } from "@/hooks/useDevicesSize";
+import MenuPermissionTree from './components/menu-permission-tree.vue'
 const { isMobile } = useDevicesSize();
 const layoutMode = computed(() => {
   let info = {
@@ -176,8 +182,6 @@ const layoutMode = computed(() => {
   };
   return isMobile.value ? info.mobile : info.desktop;
 });
-
-
 const loading = ref(false)
 const renderData = ref<Tenant[]>([])
 const formModel = reactive({
@@ -201,6 +205,7 @@ const modalFormModel = reactive({
     description: '',
     status: 1,
     platformDomain:'',
+    menuPermission: '', // 逗号分隔的菜单ID集合
 })
 
 const rules = {
@@ -272,6 +277,7 @@ const handleAdd = () => {
     modalFormModel.description = ''
     modalFormModel.status = 1
     modalFormModel.platformDomain = ''
+    modalFormModel.menuPermission = ''
     currentRecord.value = null
 }
 
@@ -291,6 +297,8 @@ const handleEdit = async (record: Tenant) => {
         modalFormModel.description = data.description || ''
         modalFormModel.status = data.status
         modalFormModel.platformDomain = data.platformDomain || ''
+        // 假设后端返回 menuPermission 字段，如果没有则默认为空字符串
+        modalFormModel.menuPermission = (data as any).menuPermission || ''
     } catch (error) {
         Message.error('获取租户信息失败')
     }

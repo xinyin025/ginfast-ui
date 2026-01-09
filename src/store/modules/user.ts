@@ -4,7 +4,7 @@ import pinia from "@/store";
 import { setAccessToken, setRefreshToken, removeAccessToken, removeRefreshToken, UserInfoKey } from "@/utils/auth";
 //import { type userType } from "@/store/types";
 import { getLocalStorage, setLocalStorage, removeLocalStorage } from "@/utils/app";
-import { type UserResult, type RefreshTokenResult, getLogin, refreshTokenApi, getProfileAPI } from "@/api/user";
+import { type UserResult, type RefreshTokenResult, getLogin, refreshTokenApi, getProfileAPI, switchTenantAPI } from "@/api/user";
 import { userType } from "@/store/types";
 import { handleUrl } from "@/utils/app";
 export const useUserStore = defineStore("user", () => {
@@ -17,10 +17,12 @@ export const useUserStore = defineStore("user", () => {
         nickname: userInfo?.nickname ?? "",
         roles: userInfo?.roles ?? [],
         permissions: userInfo?.permissions ?? [],
-        tenantID: userInfo?.tenantID ?? 0,
+        tenantID: userInfo?.tenantID ?? 0,         
         tenantCode: userInfo?.tenantCode ?? "",
         tenantName: userInfo?.tenantName ?? "",
-        tenantDomain: userInfo?.tenantDomain ?? "",
+        tenantDomain: userInfo?.tenantDomain ?? "", // 完整的租户域名
+        defaultTenant: userInfo?.defaultTenant, // 默认所属租户
+        tenants: userInfo?.tenants,    // 关联的租户列表
     });
 
     // action
@@ -55,6 +57,12 @@ export const useUserStore = defineStore("user", () => {
         account.value.nickname = "";
         account.value.roles = [];
         account.value.permissions = [];
+        account.value.tenantID = 0;
+        account.value.tenantCode = "";
+        account.value.tenantName = "";
+        account.value.tenantDomain = "";
+        account.value.defaultTenant = undefined;
+        account.value.tenants = undefined;
         // 清除 accessToken 、 refreshToken 及登录用户信息
         removeAccessToken();
         removeRefreshToken();
@@ -93,9 +101,34 @@ export const useUserStore = defineStore("user", () => {
             account.value.tenantCode = data.tenantCode;
             account.value.tenantName = data.tenantName;
             account.value.tenantDomain = data.tenantDomain;
+            account.value.defaultTenant = data.defaultTenant;
+            account.value.tenants = data.tenants;
             setLocalStorage(UserInfoKey, data);
         }
         return data;
+    };
+    /** 切换租户 */
+    const switchTenant = async (tenantId: number) => {
+        return new Promise<UserResult>((resolve, reject) => {
+            switchTenantAPI(tenantId)
+                .then(res => {
+                    if (res?.code === 0) {
+                        // 清除 accessToken 、 refreshToken 及登录用户信息
+                        removeAccessToken();
+                        removeRefreshToken();
+                        removeLocalStorage(UserInfoKey);
+                        // 切换租户成功后，设置 accessToken 和 refreshToken
+                        setAccessToken(res?.data?.accessToken, res?.data?.accessTokenExpires);
+                        setRefreshToken(res?.data?.refreshToken, res?.data?.refreshTokenExpires);
+                        resolve(res);
+                    } else {
+                        reject(res?.message || "切换租户失败");
+                    }
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        });
     };
     return {
         // State
@@ -104,7 +137,8 @@ export const useUserStore = defineStore("user", () => {
         loginByUsername,
         logOut,
         handRefreshToken,
-        getUserInfo
+        getUserInfo,
+        switchTenant
     };
 });
 

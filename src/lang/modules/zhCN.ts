@@ -45,7 +45,12 @@ export default {
         ["watermark gap"]: "水印间隙",
         ["system settings"]: "系统设置",
         ["anti-debugging"]: "防调试",
-        ["please select"]: "请选择"
+        ["please select"]: "请选择",
+        ["global-tenant"]: "全局租户",
+        ["switch-tenant"]: "切换租户",
+        ["switch-tenant-title"]: "切换租户",
+        ["switch-tenant-confirm"]: "确定要切换到租户 \"{name}\" 吗？",
+        ["switch-global-tenant-confirm"]: "确定要切换到全局租户吗？"
     },
     menu: {
         ["home"]: "首页",

@@ -45,7 +45,12 @@ export default {
         ["watermark gap"]: "watermark gap",
         ["system settings"]: "system settings",
         ["anti-debugging"]: "anti-debugging",
-        ["please select"]: "please select"
+        ["please select"]: "please select",
+        ["global-tenant"]: "Global Tenant",
+        ["switch-tenant"]: "Switch Tenant",
+        ["switch-tenant-title"]: "Switch Tenant",
+        ["switch-tenant-confirm"]: "Are you sure you want to switch to tenant \"{name}\"?",
+        ["switch-global-tenant-confirm"]: "Are you sure you want to switch to global tenant?"
     },
     menu: {
         ["home"]: "home",

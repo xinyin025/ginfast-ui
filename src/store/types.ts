@@ -1,3 +1,4 @@
+import { Tenant } from "@/api/tenant";
 export type userType = {
   id: number;
   avatar: string;
@@ -9,4 +10,6 @@ export type userType = {
   tenantCode: string;
   tenantName: string;
   tenantDomain: string;
+  defaultTenant?: Tenant;
+  tenants?: Array<Tenant>;
 };

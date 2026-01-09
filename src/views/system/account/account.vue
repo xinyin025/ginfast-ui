@@ -174,9 +174,10 @@
 </template>
 
 <script setup lang="ts">
-import { getDivisionAPI } from "@/api/department";
+import { getDivisionAPI } from "@/api/department";   
 import { getRolesAPI } from "@/api/role";
 import { getAccountListAPI, addAccountAPI, editAccountAPI, deleteAccountAPI } from "@/api/user";
+//import { getAccountDetailAPI} from "@/api/user";
 import { deepClone } from "@/utils";
 import { formatTime } from "@/globals";
 import { useDevicesSize } from "@/hooks/useDevicesSize";
@@ -338,6 +339,8 @@ const handleOk = async () => {
         if (formType.value == 0) {
             await addAccountAPI(addFrom.value);
         } else {
+
+
             await editAccountAPI(addFrom.value);
         }
     } catch (error) {
@@ -366,6 +369,9 @@ const afterClose = () => {
     };
 };
 const onUpdate = (row: any) => {
+    // getAccountDetailAPI(row.id).then((res)=> {
+    //     console.log(res)
+    // })
     title.value = "修改账号";
     formType.value = 1;
     addFrom.value = deepClone({ ...row, roles: row.roles.map((item: any) => item.id) });

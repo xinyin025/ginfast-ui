@@ -58,9 +58,9 @@
             </a-button>
         </a-tooltip>
         <!-- 我的 -->
-        <a-dropdown trigger="hover">
+        <a-dropdown trigger="hover" :popup-max-height="false">
             <div class="my_setting" id="system-my-setting">
-                <a-image width="32" height="32" fit="cover" :src="account.avatar || myImage" class="my_image" />
+                <a-image width="32" height="32" fit="cover" :src="account.avatar" class="my_image" />
                 <span class="user-nickname">{{ account.nickName }}</span>
                 <div class="icon_down">
                     <icon-down style="stroke-width: 3" />
@@ -81,6 +81,30 @@
                         <span class="margin-left-text">{{ $t(`system.change-password`) }}</span>
                     </template>
                 </a-doption>
+                <!-- 全局租户 -->
+                <a-doption v-if="showGlobalTenant" @click="switchToGlobalTenant">
+                    <template #default>
+                        <s-svg-icon :name="'home'" :size="18" />
+                        <span class="margin-left-text">{{ $t('system.global-tenant') }}</span>
+                    </template>
+                </a-doption>
+                <!-- 切换租户 -->
+                <a-dropdown v-if="showTenantSwitch" trigger="hover" position="right">
+                    <a-doption>
+                        <template #default>
+                            <s-svg-icon :name="'switch'" :size="18" />
+                            <span class="margin-left-text">{{ $t('system.switch-tenant') }}</span>
+                            <icon-down style="margin-left: auto; stroke-width: 3" />
+                        </template>
+                    </a-doption>
+                    <template #content>
+                        <a-doption v-for="tenant in switchableTenants" :key="tenant.id" @click="switchTenant(tenant)">
+                            <template #default>
+                                <span>{{ tenant.name }}</span>
+                            </template>
+                        </a-doption>
+                    </template>
+                </a-dropdown>
                 <!-- 项目地址 -->
                 <a-doption @click="onProject">
                     <template #default>
@@ -107,7 +131,7 @@
 import Notice from "@/layout/components/Header/components/Notice/index.vue";
 import SystemSettings from "@/layout/components/Header/components/system-settings/index.vue";
 import ThemeSettings from "@/layout/components/Header/components/theme-settings/index.vue";
-import myImage from "@/assets/img/my-image.jpg";
+//import myImage from "@/assets/img/my-image.jpg";
 import { useI18n } from "vue-i18n";
 import { Modal } from "@arco-design/web-vue";
 import { useRouter } from "vue-router";
@@ -127,6 +151,71 @@ const { language, darkMode } = storeToRefs(themeStore);
 //const { account } = storeToRefs(userStore);
 import { useUserStoreHook } from "@/store/modules/user";
 const account = useUserStoreHook().account;
+
+// 判断是否显示切换租户按钮
+const showTenantSwitch = computed(() => {
+    return account.tenants && account.tenants.some((t: any) => t.id !== account.tenantID);
+});
+
+// 判断是否显示全局租户按钮
+const showGlobalTenant = computed(() => {
+    return (account.defaultTenant === null || account.defaultTenant === undefined) && account.tenantID > 0;
+});
+
+// 可切换的租户列表
+const switchableTenants = computed(() => {
+    if (!account.tenants) return [];
+    return account.tenants.filter((t: any) => t.id !== account.tenantID);
+});
+
+// 切换租户
+const switchTenant = async (tenant: any) => {
+    Modal.confirm({
+        title: i18n.t('system.switch-tenant-title'),
+        content: i18n.t('system.switch-tenant-confirm', { name: tenant.name }),
+        hideCancel: false,
+        closable: true,
+        onBeforeOk: async () => {
+            try {
+                // 调用切换租户 API
+                await useUserStoreHook().switchTenant(tenant.id);
+                // 重新获取用户信息
+                await useUserStoreHook().getUserInfo();
+                // 刷新页面
+                window.location.reload();
+                return true;
+            } catch (error: any) {
+                console.error("切换租户失败:", error);
+                return false;
+            }
+        }
+    });
+};
+
+// 切换到全局租户
+const switchToGlobalTenant = async () => {
+    Modal.confirm({
+        title: i18n.t('system.switch-tenant-title'),
+        content: i18n.t('system.switch-global-tenant-confirm'),
+        hideCancel: false,
+        closable: true,
+        onBeforeOk: async () => {
+            try {
+                // 调用切换租户 API，传入 0 表示全局租户
+                await useUserStoreHook().switchTenant(0);
+                // 重新获取用户信息
+                await useUserStoreHook().getUserInfo();
+                // 刷新页面
+                window.location.reload();
+                return true;
+            } catch (error: any) {
+                console.error("切换租户失败:", error);
+                return false;
+            }
+        }
+    });
+};
+
 // 系统设置
 const systemOpen = ref(false);
 const onSystemSetting = () => {

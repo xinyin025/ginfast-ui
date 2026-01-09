@@ -6,6 +6,7 @@
                     <a-col :span="isMobile ? 24 : 2">
                         <div class="avatar-container" :class="{ 'mobile-avatar': isMobile }">
                             <a-avatar :size="isMobile ? 80 : 100" @click="showAvatarUpload" trigger-type="mask" :imageUrl="userInfo.avatar">
+                                <IconUser />
                                 <template #trigger-icon>
                                     <IconEdit />
                                 </template>
@@ -27,6 +28,12 @@
                                     </span>
                                     <span v-else-if="data.key == 'createTime'">
                                         {{ formatTime(value) }}
+                                    </span>
+                                    <span v-else-if="data.key == 'defaultTenant'">
+                                        {{ value }}
+                                    </span>
+                                    <span v-else-if="data.key == 'tenants'">
+                                        {{ value }}
                                     </span>
                                     <span v-else>{{ value }}</span>
                                 </template>
@@ -96,13 +103,15 @@ import useGlobalProperties from "@/hooks/useGlobalProperties";
 import { useRouteConfigStore } from "@/store/modules/route-config";
 import { type ProfileItem,  uploadAvatarAPI, getProfileAPI } from "@/api/user";
 import { formatTime } from "@/globals";
-import { IconEdit } from '@arco-design/web-vue/es/icon';
+import { IconEdit, IconUser  } from '@arco-design/web-vue/es/icon';
 import { useDevicesSize } from "@/hooks/useDevicesSize";
 const { isMobile } = useDevicesSize();
 // 裁剪组件
 import { VueCropper } from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
 import { handleUrl } from "@/utils/app";
+import { useUserStoreHook } from "@/store/modules/user";
+
 const route = useRoute();
 const proxy = useGlobalProperties();
 const routerStore = useRouteConfigStore();
@@ -253,7 +262,9 @@ const confirmUploadAvatar = () => {
         formData.append('file', data, selectedFileName.value);
         uploadAvatarAPI(formData).then(res => {
             const { data } = res
-            userInfo.value.avatar = handleUrl(data.url);
+            const avatarUrl = handleUrl(data.url)
+            userInfo.value.avatar = avatarUrl;
+            useUserStoreHook().account.avatar = avatarUrl;
             resetAvatarUpload();
             proxy.$message.success('头像上传成功');
         })
@@ -297,11 +308,27 @@ const getUserInfo = async () => {
             description: userInfo.value.description
         };
 
+      
+
         detail.value.forEach((item: Detail) => {
             if (userMap.hasOwnProperty(item.key)) {
                 item.value = (userMap as any)[item.key];
             }
         });
+
+          // 当 defaultTenant 非空时，添加租户相关字段
+        if (userInfo.value.defaultTenant) {
+            detail.value.push({
+                key: "defaultTenant",
+                label: "默认租户：",
+                value: userInfo.value.defaultTenant?.name || '-'
+            });
+            detail.value.push({
+                key: "tenants",
+                label: "关联租户：",
+                value: userInfo.value.tenants?.map((t: any) => t.name).join(', ') || '-'
+            });
+        }
     } finally {
         loading.value = false;
     }
