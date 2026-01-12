@@ -157,7 +157,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { getTenantList, addTenant, updateTenant, deleteTenant, getTenantById, Tenant } from '@/api/tenant'
 import { formatTime } from "@/globals";
@@ -211,6 +211,7 @@ const modalFormModel = reactive({
 const rules = {
     name: [{ required: true, message: '请输入租户名称' }],
     code: [{ required: true, message: '请输入租户编码' }],
+    domain: [{ required: true, message: '请输入自定义域名' }],
 }
 
 const pagination = reactive({
@@ -280,6 +281,13 @@ const handleAdd = () => {
     modalFormModel.menuPermission = ''
     currentRecord.value = null
 }
+
+// 监听code变化，自动填充domain
+watch(() => modalFormModel.code, (newCode) => {
+    if (newCode && !isEdit.value) {
+        modalFormModel.domain = `${newCode}.example.com`
+    }
+})
 
 const handleEdit = async (record: Tenant) => {
     modalTitle.value = '编辑租户'
